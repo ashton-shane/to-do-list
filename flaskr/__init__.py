@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 
 def create_app(test_config=None):
@@ -23,13 +23,23 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    # a simple page that says hello
+    # ============= APP ROUTES HERE ============= #
     @app.route('/')
     def todolist():
         return render_template("index.html")
     
-    @app.route('/login')
+    @app.route('/login', methods=["GET", "POST"])
     def login():
-        return render_template("login.html")
+        if request.method == "GET":
+            return render_template("login.html")
+        else:
+            return render_template("login.html")
 
+    @app.route('/register', methods=["GET", "POST"])
+    def register():
+        if request.method == "GET":
+            return render_template("register.html")
+        else: 
+            return render_template("register.html")
+        
     return app
