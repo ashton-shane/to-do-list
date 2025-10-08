@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 
 def create_app(test_config=None):
@@ -22,10 +22,24 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-    
-    # a simple page that says hello
-    @app.route('/')
-    def hello():
-        return render_template("index.html")
 
+    # ============= APP ROUTES HERE ============= #
+    @app.route('/')
+    def todolist():
+        return render_template("index.html")
+    
+    @app.route('/login', methods=["GET", "POST"])
+    def login():
+        if request.method == "GET":
+            return render_template("login.html")
+        else:
+            return render_template("login.html")
+
+    @app.route('/register', methods=["GET", "POST"])
+    def register():
+        if request.method == "GET":
+            return render_template("register.html")
+        else: 
+            return render_template("register.html")
+        
     return app
