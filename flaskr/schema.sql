@@ -11,7 +11,7 @@ CREATE TABLE tasks (
     user_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     description TEXT,
-    completed BOOLEAN DEFAULT 0,
+    completed BOOLEAN DEFAULT FALSE,
     priority INTEGER DEFAULT 0,
     due_date DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
