@@ -12,6 +12,7 @@ def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
+    db.row_factory = sqlite3.Row
     return db
 
 @app.teardown_appcontext
@@ -56,15 +57,14 @@ def create_app(test_config=None):
 
     @app.route('/register', methods=["GET", "POST"])
     def register():
-        # open db
-        cur = get_db().cursor()
         if request.method == "GET":
             return render_template("register.html")
         else: 
             name = request.form['name']
             username = request.form['username']
+            email = request.form['email']
             pw_hash = generate_password_hash(request.form['password'])
-            register_user(name, username, pw_hash, cur)
+            register_user(name, username, email, pw_hash)
             
             return render_template("register.html")
         
