@@ -1,5 +1,7 @@
 import os
 from flask import Flask, render_template, request
+from werkzeug.security import generate_password_hash, check_password_hash
+from helpers import register_user
 
 
 def create_app(test_config=None):
@@ -40,6 +42,11 @@ def create_app(test_config=None):
         if request.method == "GET":
             return render_template("register.html")
         else: 
+            name = request.form['name']
+            username = request.form['username']
+            pw_hash = generate_password_hash(request.form['password'])
+            register_user(name, username, pw_hash)
+
             return render_template("register.html")
         
     return app
