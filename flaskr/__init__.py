@@ -46,7 +46,7 @@ def create_app(test_config=None):
             username = request.form['username']
             pw_hash = generate_password_hash(request.form['password'])
             register_user(name, username, pw_hash)
-            
+
             return render_template("register.html")
         
     return app
