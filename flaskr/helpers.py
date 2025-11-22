@@ -1,2 +1,1 @@
-def register_user():
-    
+def register_user(name, username, pw_hash):
