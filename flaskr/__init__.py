@@ -2,8 +2,25 @@ import os
 from flask import Flask, render_template, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from helpers import register_user
+import sqlite3
+from flask import g
 
+# === DATABASE INITIALISATION BOILERPLATE CONFIG === #
+DATABASE = 'database.db'
 
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
+
+# === MAIN APP CONFIGURATION === #
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -39,13 +56,15 @@ def create_app(test_config=None):
 
     @app.route('/register', methods=["GET", "POST"])
     def register():
+        # open db
+        cur = get_db().cursor()
         if request.method == "GET":
             return render_template("register.html")
         else: 
             name = request.form['name']
             username = request.form['username']
             pw_hash = generate_password_hash(request.form['password'])
-            register_user(name, username, pw_hash)
+            register_user(name, username, pw_hash, cur)
             
             return render_template("register.html")
         
