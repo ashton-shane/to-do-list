@@ -1,9 +1,9 @@
 import os
 from flask import Flask, render_template, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from .helpers import register_user, query_db
+from .helpers import register_user, query_db, validate_field
 import sqlite3
-from flask import g
+from flask import g, redirect, url_for
 
 
 # === MAIN APP CONFIGURATION === #
@@ -63,11 +63,28 @@ def create_app(test_config=None):
         if request.method == "GET":
             return render_template("register.html")
         else: 
+            # Retrieve data from form
             name = request.form['name']
             username = request.form['username']
             email = request.form['email']
-            pw_hash = generate_password_hash(request.form['password'])
-            register_user(get_db, username, email, pw_hash, name)
-            return render_template("index.html")
-        
+            pw1 = request.form['password']
+            pw2 = request.form['cfm_password']
+
+            # Backend check for matching passwords
+            if not (pw1 == pw2):
+                return redirect(url_for('register'))
+
+            # Validate fields
+            if validate_field(email, "email") and validate_field(username, "user") and validate_field(pw1, "pw"):
+                # Generate PW Hash
+                pw_hash = generate_password_hash(pw1)
+                # Insert into DB
+                register_user(get_db, username, email, pw_hash, name)
+                # Redirect user to index page
+                redirect(url_for('index'))
+
+            # IF registration fails
+            return redirect(url_for('register'))
+    
+    # === END OF APP === #
     return app
