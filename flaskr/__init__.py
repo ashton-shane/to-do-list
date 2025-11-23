@@ -1,9 +1,12 @@
 import os
 from flask import Flask, render_template, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from helpers import register_user
+from .helpers import register_user, query_db
+import sqlite3
+from flask import g
 
 
+# === MAIN APP CONFIGURATION === #
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -24,6 +27,24 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+    
+    # === DATABASE INITIALISATION BOILERPLATE CONFIG === #
+    DATABASE = 'instance/todo.db'
+
+    def get_db():
+        db = getattr(g, '_database', None)
+        if db is None:
+            db = g._database = sqlite3.connect(DATABASE)
+            print(f"=== Connected to database: {DATABASE} ===")
+        db.row_factory = sqlite3.Row
+        return db
+
+    @app.teardown_appcontext
+    def close_connection(exception):
+        db = getattr(g, '_database', None)
+        if db is not None:
+            db.close()
+            
 
     # ============= APP ROUTES HERE ============= #
     @app.route('/')
@@ -44,8 +65,9 @@ def create_app(test_config=None):
         else: 
             name = request.form['name']
             username = request.form['username']
+            email = request.form['email']
             pw_hash = generate_password_hash(request.form['password'])
-            register_user(name, username, pw_hash)
-            return render_template("register.html")
+            register_user(get_db, username, email, pw_hash, name)
+            return render_template("index.html")
         
     return app
