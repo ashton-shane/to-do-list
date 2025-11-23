@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from .helpers import register_user
+from .helpers import register_user, query_db
 import sqlite3
 from flask import g
 
@@ -29,7 +29,7 @@ def create_app(test_config=None):
         pass
     
     # === DATABASE INITIALISATION BOILERPLATE CONFIG === #
-    DATABASE = 'database.db'
+    DATABASE = 'instance/todo.db'
 
     def get_db():
         db = getattr(g, '_database', None)
@@ -67,7 +67,7 @@ def create_app(test_config=None):
             username = request.form['username']
             email = request.form['email']
             pw_hash = generate_password_hash(request.form['password'])
-            register_user(get_db, name, username, email, pw_hash)
+            register_user(get_db, username, email, pw_hash, name)
             return render_template("index.html")
         
     return app
